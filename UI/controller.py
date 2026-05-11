@@ -1,4 +1,5 @@
 import flet as ft
+from pygments.lexers.css import common_sass_tokens
 
 
 class Controller:
@@ -56,5 +57,31 @@ class Controller:
             ft.Text(
                 f"La componente connessa contenente l'oggetto con id {idOggetto} è composta di {sizeCompConn} nodi.",
                 color="green"))
+
+        self._view._ddLun.disabled = False
+        self._view._btnCerca.disabled = False
+
+        lunValues = range(2, sizeCompConn)
+        for v in lunValues:
+            self._view._ddLun.options.append(ft.dropdown.Option(v))
+            #ciclo su tutti i possibili valori di lunghezza e li aggiungp uno a uno
+
+        '''posso fare la stessa cosa col metodo map: gli passo una funzione e una lista.
+        Mi rida una nuova lista dove a tutti gli elementi della lista vecchia è stata applicata la funzione'''
+        lunValuesDD = (lambda x: ft.dropdown.Option(x), lunValues )
+
+
         self._view.update_page()
 
+    def handleCerca(self, e):
+        self._model.getNodeFromId(int(self._view.txtIdOggetto.value))
+        lun = self._view._ddLun.value
+        if lun is None:
+            self._view.txt_result.controls.clear()
+            self._view.txt_result.controls.append(ft.Text("Attenzione selezionare un valore di lunghezza tra le scelte proposte",
+                                                          color="red"))
+            self._view.update_page()
+            return
+
+        lunInt= int(lun)
+        path, cost= self._model.getOptPath(source, lun)
