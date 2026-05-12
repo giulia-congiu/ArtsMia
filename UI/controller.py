@@ -22,7 +22,7 @@ class Controller:
         self._view.update_page()
 
     def handleCompConnessa(self,e):
-        txtIdOggetto = self._view._txtIdOggetto.value #recupero l'input dell'utente
+        txtIdOggetto = self._view._txtIdOggetto.value #recupero l'imput dell'utente
 
         #FACCIO DEI CONTROLLI
         #1) CONTROLLO SE è VUOTO
@@ -46,7 +46,8 @@ class Controller:
         if not self._model.hasNode(idOggetto):
             self._view.txt_result.controls.clear()
             self._view.txt_result.controls.append(
-                ft.Text(f"Attenzione, l'id inserito non è presente nel grafo.", color="orange"))
+                ft.Text(f"Attenzione, l'id inserito non è presente nel grafo.",
+                        color="orange"))
             self._view.update_page()
             return
 
@@ -58,30 +59,41 @@ class Controller:
                 f"La componente connessa contenente l'oggetto con id {idOggetto} è composta di {sizeCompConn} nodi.",
                 color="green"))
 
+        #ora posso riabilitare questi pulsanti
         self._view._ddLun.disabled = False
         self._view._btnCerca.disabled = False
 
         lunValues = range(2, sizeCompConn)
-        for v in lunValues:
-            self._view._ddLun.options.append(ft.dropdown.Option(v))
-            #ciclo su tutti i possibili valori di lunghezza e li aggiungp uno a uno
-
+        # for v in lunValues:
+        #     self._view._ddLun.options.append(ft.dropdown.Option(v))
+            #ciclo su tutti i possibili valori di lunghezza e li aggiungo uno a uno
         '''posso fare la stessa cosa col metodo map: gli passo una funzione e una lista.
         Mi rida una nuova lista dove a tutti gli elementi della lista vecchia è stata applicata la funzione'''
-        lunValuesDD = (lambda x: ft.dropdown.Option(x), lunValues )
-
-
+        lunValuesDD = list(map(lambda x: ft.dropdown.Option(x), lunValues ))
+        self._view._ddLun.options = lunValuesDD
         self._view.update_page()
 
     def handleCerca(self, e):
-        self._model.getNodeFromId(int(self._view.txtIdOggetto.value))
+        source= self._model.getNodeFromId(int(self._view._txtIdOggetto.value))
         lun = self._view._ddLun.value
         if lun is None:
             self._view.txt_result.controls.clear()
-            self._view.txt_result.controls.append(ft.Text("Attenzione selezionare un valore di lunghezza tra le scelte proposte",
-                                                          color="red"))
+            self._view.txt_result.controls.append(
+                ft.Text("Attenzione, selezionare un "
+                        "valore di lunghezza tra le scelte proposte",
+                        color="red"))
             self._view.update_page()
             return
 
         lunInt= int(lun)
-        path, cost= self._model.getOptPath(source, lun)
+        path, cost= self._model.getOptPath(source, lunInt)
+        self._view.txt_result.controls.clear()
+        self._view.txt_result.controls.append(
+            ft.Text(f"Ho trovato un cammino che parte da {source} "
+                    f"che ha un peso totale pari a {cost}.", color="green"))
+        self._view.txt_result.controls.append(
+            ft.Text(f"Di seguito i nodi che compongono questo cammino:", color="green"))
+        for p in path:
+            self._view.txt_result.controls.append(ft.Text(p))
+
+        self._view.update_page()
